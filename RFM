@@ -1,0 +1,26 @@
+SELECT *, COUNT(id) OVER(Partition by id) as Transactions, DATEDIFF('2016-11-30', MAX(date)) AS last_visit_Day
+,SUM(price) AS Total_Spent
+,CASE 
+WHEN (SUM(price)/16000)*100 >= 0 AND (SUM(price)/16000)*100 <= 20 THEN '1'
+WHEN (SUM(price)/16000)*100 > 20 AND (SUM(price)/16000)*100 <= 40 THEN '2'
+WHEN (SUM(price)/16000)*100 > 40 AND (SUM(price)/16000)*100 <= 60 THEN '3'
+WHEN (SUM(price)/16000)*100 > 60 AND (SUM(price)/16000)*100 <= 80 THEN '4'
+WHEN (SUM(price)/16000)*100 > 80 AND (SUM(price)/16000)*100 <= 100 THEN '5'
+END AS Monetary
+,CASE 
+WHEN (DATEDIFF('2016-11-30', MAX(date))/699)*100 >= 0 AND (DATEDIFF('2016-11-30', MAX(date))/699)*100 <= 20 THEN '5'
+WHEN (DATEDIFF('2016-11-30', MAX(date))/699)*100 > 20 AND (DATEDIFF('2016-11-30', MAX(date))/699)*100 <= 40 THEN '4'
+WHEN (DATEDIFF('2016-11-30', MAX(date))/699)*100 > 40 AND (DATEDIFF('2016-11-30', MAX(date))/699)*100 <= 60 THEN '3'
+WHEN (DATEDIFF('2016-11-30', MAX(date))/699)*100 > 60 AND (DATEDIFF('2016-11-30', MAX(date))/699)*100 <= 80 THEN '2'
+WHEN (DATEDIFF('2016-11-30', MAX(date))/699)*100 > 80 AND (DATEDIFF('2016-11-30', MAX(date))/699)*100 <= 100 THEN '1'
+END AS Recency
+,CASE
+WHEN COUNT(id) OVER(Partition by id) <=25 AND COUNT(id) OVER(Partition by id) >=20 THEN '5'
+WHEN COUNT(id) OVER(Partition by id) < 20 AND COUNT(id) OVER(Partition by id) >=15 THEN '4'
+WHEN COUNT(id) OVER(Partition by id) < 15 AND COUNT(id) OVER(Partition by id) >=10 THEN '3'
+WHEN COUNT(id) OVER(Partition by id) < 10 AND COUNT(id) OVER(Partition by id) >= 5 THEN '2'
+WHEN COUNT(id) OVER(Partition by id) < 5 AND COUNT(id) OVER(Partition by id) >= 0 THEN '1'
+END AS Frequency
+FROM ecomm_class
+GROUP BY id
+ORDER BY 1 asc;
